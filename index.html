@@ -115,26 +115,20 @@
             <div class="p-4 md:p-8 flex-1 max-w-5xl mx-auto w-full">
                 
                 <main id="view-home" class="view-section active">
-                    <div class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl md:text-2xl font-bold text-slate-800">Ringkasan Kas</h2>
-                            <p class="text-slate-500 text-sm mt-1">Pantau arus kas yayasan berdasarkan filter.</p>
+                    <div class="mb-4 flex flex-row items-center justify-end gap-2 w-full">
+                        <!-- Filter Kategori -->
+                        <div class="relative w-1/2 sm:w-auto">
+                            <select id="home-category-filter" class="appearance-none bg-white border border-slate-200 text-purple-700 text-xs sm:text-sm rounded-xl focus:ring-purple-500 focus:border-purple-500 block px-3 sm:px-4 py-2 sm:py-2.5 pr-8 sm:pr-10 shadow-sm font-bold cursor-pointer outline-none transition-all w-full min-w-[100px]">
+                                <!-- Diisi via JS -->
+                            </select>
+                            <i class="ph-bold ph-caret-down absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs sm:text-base"></i>
                         </div>
-                        <div class="flex flex-row items-center justify-end gap-2 w-full sm:w-auto mt-1 sm:mt-0">
-                            <!-- Filter Kategori -->
-                            <div class="relative w-1/2 sm:w-auto">
-                                <select id="home-category-filter" class="appearance-none bg-white border border-slate-200 text-purple-700 text-xs sm:text-sm rounded-xl focus:ring-purple-500 focus:border-purple-500 block px-3 sm:px-4 py-2 sm:py-2.5 pr-8 sm:pr-10 shadow-sm font-bold cursor-pointer outline-none transition-all w-full min-w-[100px]">
-                                    <!-- Diisi via JS -->
-                                </select>
-                                <i class="ph-bold ph-caret-down absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs sm:text-base"></i>
-                            </div>
-                            <!-- Filter Tahun -->
-                            <div class="relative w-1/2 sm:w-auto">
-                                <select id="home-year-filter" class="appearance-none bg-white border border-slate-200 text-emerald-700 text-xs sm:text-sm rounded-xl focus:ring-emerald-500 focus:border-emerald-500 block px-3 sm:px-4 py-2 sm:py-2.5 pr-8 sm:pr-10 shadow-sm font-bold cursor-pointer outline-none transition-all w-full min-w-[90px]">
-                                    <!-- Diisi via JS -->
-                                </select>
-                                <i class="ph-bold ph-caret-down absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs sm:text-base"></i>
-                            </div>
+                        <!-- Filter Tahun -->
+                        <div class="relative w-1/2 sm:w-auto">
+                            <select id="home-year-filter" class="appearance-none bg-white border border-slate-200 text-emerald-700 text-xs sm:text-sm rounded-xl focus:ring-emerald-500 focus:border-emerald-500 block px-3 sm:px-4 py-2 sm:py-2.5 pr-8 sm:pr-10 shadow-sm font-bold cursor-pointer outline-none transition-all w-full min-w-[90px]">
+                                <!-- Diisi via JS -->
+                            </select>
+                            <i class="ph-bold ph-caret-down absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs sm:text-base"></i>
                         </div>
                     </div>
 
