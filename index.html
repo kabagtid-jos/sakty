@@ -644,6 +644,51 @@
                     </div>
                 `;
             });
+
+            // Render Grafik Chart.js
+            document.getElementById('chart-year-label').innerText = filterYear;
+            const monthlyIncome = Array(12).fill(0);
+            const monthlyExpense = Array(12).fill(0);
+            
+            filteredTx.forEach(tx => {
+                const month = new Date(tx.date).getMonth(); // 0 = Jan, 11 = Des
+                if (tx.type === 'masuk') monthlyIncome[month] += tx.amount;
+                else monthlyExpense[month] += tx.amount;
+            });
+
+            const ctx = document.getElementById('cashflowChart').getContext('2d');
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#94a3b8' : '#64748b'; // slate-400 : slate-500
+            const gridColor = isDark ? '#1e293b' : '#f1f5f9'; // slate-800 : slate-100
+            const incomeColor = isDark ? '#2dd4bf' : '#14b8a6'; // teal-400 : teal-500
+            const expenseColor = isDark ? '#fb7185' : '#f43f5e'; // rose-400 : rose-500
+
+            if (window.cashflowChartInstance) { window.cashflowChartInstance.destroy(); }
+
+            window.cashflowChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                    datasets: [
+                        { label: 'Pemasukan', data: monthlyIncome, backgroundColor: incomeColor, borderRadius: 6, borderSkipped: false },
+                        { label: 'Pengeluaran', data: monthlyExpense, backgroundColor: expenseColor, borderRadius: 6, borderSkipped: false }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: textColor, font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600' } } },
+                        y: { grid: { color: gridColor }, ticks: { color: textColor, font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600' } } }
+                    },
+                    plugins: {
+                        legend: { position: 'top', labels: { color: textColor, font: { family: "'Plus Jakarta Sans', sans-serif", weight: '700' }, usePointStyle: true, boxWidth: 8 } },
+                        tooltip: { backgroundColor: isDark ? '#0f172a' : '#ffffff', titleColor: isDark ? '#ffffff' : '#0f172a', bodyColor: isDark ? '#cbd5e1' : '#475569', borderColor: gridColor, borderWidth: 1, padding: 12, boxPadding: 6, usePointStyle: true,
+                            callbacks: { label: function(context) { return context.dataset.label + ': ' + formatRupiah(context.raw); } }
+                        }
+                    }
+                }
+            });
         }
 
         function setReportMode(mode) {
