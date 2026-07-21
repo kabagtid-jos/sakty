@@ -66,7 +66,22 @@
             color: white;
         }
 
-    </style>
+    
+        /* Custom dropdown mobile */
+        .custom-select-wrap { position: relative; width:100%; }
+        .custom-select-native { position:absolute!important; opacity:0!important; pointer-events:none!important; width:1px!important; height:1px!important; }
+        .custom-select-btn { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; min-height:42px; padding:10px 14px; border-radius:14px; background:white; border:1px solid #e2e8f0; color:#334155; font-size:14px; font-weight:700; cursor:pointer; transition:.2s; }
+        .custom-select-btn:hover,.custom-select-btn.active { border-color:#14b8a6; box-shadow:0 0 0 3px rgba(20,184,166,.12); }
+        .dark .custom-select-btn { background:#1e293b; border-color:#334155; color:white; }
+        .custom-select-menu { position:absolute; z-index:100; left:0; right:0; top:calc(100% + 8px); max-height:220px; overflow-y:auto; background:white; border:1px solid #e2e8f0; border-radius:16px; padding:6px; box-shadow:0 15px 35px rgba(15,23,42,.18); display:none; }
+        .custom-select-menu.show { display:block; animation:dropIn .15s ease; }
+        .dark .custom-select-menu { background:#0f172a; border-color:#334155; }
+        .custom-option { padding:10px 12px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; color:#334155; }
+        .custom-option:hover,.custom-option.selected { background:#ccfbf1; color:#0f766e; }
+        .dark .custom-option { color:#e2e8f0; }
+        .dark .custom-option:hover,.dark .custom-option.selected { background:#134e4a; color:#99f6e4; }
+        @keyframes dropIn { from {opacity:0; transform:translateY(-5px)} to {opacity:1; transform:none} }
+</style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-300">
 
@@ -853,5 +868,60 @@
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
     </script>
+<script>
+
+// Custom dropdown renderer untuk desktop & mobile
+function initSaktyCustomDropdowns(){
+    document.querySelectorAll('select.sakty-select').forEach(sel=>{
+        if(sel.dataset.customized) return;
+        sel.dataset.customized='true';
+        const wrap=document.createElement('div');
+        wrap.className='custom-select-wrap';
+        sel.parentNode.insertBefore(wrap, sel);
+        wrap.appendChild(sel);
+        sel.classList.add('custom-select-native');
+
+        const btn=document.createElement('button');
+        btn.type='button';
+        btn.className='custom-select-btn';
+        const menu=document.createElement('div');
+        menu.className='custom-select-menu';
+        wrap.appendChild(btn);
+        wrap.appendChild(menu);
+
+        function render(){
+            const value=sel.options[sel.selectedIndex]?.text || '';
+            btn.innerHTML=`<span>${value}</span><i class="ph-bold ph-caret-down"></i>`;
+            menu.innerHTML='';
+            Array.from(sel.options).forEach((opt)=>{
+                const item=document.createElement('div');
+                item.className='custom-option'+(opt.value===sel.value?' selected':'');
+                item.textContent=opt.text;
+                item.onclick=()=>{
+                    sel.value=opt.value;
+                    sel.dispatchEvent(new Event('change',{bubbles:true}));
+                    render();
+                    menu.classList.remove('show');
+                    btn.classList.remove('active');
+                };
+                menu.appendChild(item);
+            });
+        }
+        btn.onclick=(e)=>{
+            e.stopPropagation();
+            document.querySelectorAll('.custom-select-menu.show').forEach(m=>m!==menu&&m.classList.remove('show'));
+            menu.classList.toggle('show');
+            btn.classList.toggle('active');
+        };
+        new MutationObserver(render).observe(sel,{childList:true});
+        render();
+    });
+    document.addEventListener('click',()=>document.querySelectorAll('.custom-select-menu.show').forEach(m=>m.classList.remove('show')));
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+    setTimeout(initSaktyCustomDropdowns,500);
+});
+</script>
 </body>
 </html>
