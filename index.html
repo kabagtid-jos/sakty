@@ -138,6 +138,18 @@
                         </div>
                     </div>
 
+                    <!-- Saldo Utama Card -->
+                    <div class="bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-3xl p-6 md:p-8 shadow-xl shadow-slate-200 mb-6 relative overflow-hidden">
+                        <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
+                        <div class="absolute right-10 bottom-10 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl"></div>
+                        <div class="flex items-center gap-3 mb-2 relative z-10 opacity-90">
+                            <i class="ph-fill ph-wallet text-2xl text-emerald-400"></i>
+                            <h3 class="font-medium text-sm md:text-base text-slate-300" id="label-main-balance">Total Saldo Kas</h3>
+                        </div>
+                        <h2 class="text-4xl md:text-5xl font-bold tracking-tight text-white relative z-10 mb-1 transition-colors" id="main-balance">Rp 0</h2>
+                        <p class="text-xs text-slate-400 relative z-10 font-medium">*Dihitung dari keseluruhan waktu untuk kategori terpilih.</p>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8">
                         <div class="bg-emerald-500 text-white rounded-3xl p-6 md:p-8 shadow-lg shadow-emerald-200 relative overflow-hidden">
                             <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
@@ -584,7 +596,7 @@
             // Dropdown Tahun (Beranda)
             const yearDropdown = document.getElementById('home-year-filter');
             yearDropdown.innerHTML = '';
-            if (!availableYears.includes(filterYear)) filterYear = availableYears[0];
+            if (!availableYears.includes(filterYear)) filterYear = availableYears[0] || new Date().getFullYear().toString();
             availableYears.forEach(y => {
                 yearDropdown.innerHTML += `<option value="${y}" ${y === filterYear ? 'selected' : ''}>Tahun ${y}</option>`;
             });
@@ -604,18 +616,39 @@
         }
 
         function renderHome() {
-            document.getElementById('label-income-year').innerText = `Pemasukan - ${filterCategory !== 'Semua' ? filterCategory : filterYear}`;
-            document.getElementById('label-expense-year').innerText = `Pengeluaran - ${filterCategory !== 'Semua' ? filterCategory : filterYear}`;
+            document.getElementById('label-income-year').innerText = `Pemasukan - ${filterYear}`;
+            document.getElementById('label-expense-year').innerText = `Pengeluaran - ${filterYear}`;
+            document.getElementById('label-main-balance').innerText = filterCategory === 'Semua' ? 'Total Saldo Semua Kas' : `Sisa Saldo: ${filterCategory}`;
 
             let income = 0; let expense = 0;
+            let allTimeIncome = 0; let allTimeExpense = 0;
             
-            // Filter berdasarkan Tahun DAN Kategori
-            const filteredTx = transactions.filter(tx => {
-                const matchYear = tx.date.substring(0,4) === filterYear;
-                const txCat = tx.category || 'Kas Umum'; // Fallback jika data lama tidak punya kategori
-                const matchCat = filterCategory === 'Semua' || txCat === filterCategory;
-                return matchYear && matchCat;
+            // 1. Hitung All-Time (Keseluruhan Waktu) untuk Saldo Utama berdasarkan Kategori
+            const catFilteredTx = transactions.filter(tx => {
+                const txCat = tx.category || 'Kas Umum'; // Fallback
+                return filterCategory === 'Semua' || txCat === filterCategory;
             });
+
+            catFilteredTx.forEach(tx => {
+                if (tx.type === 'masuk') allTimeIncome += tx.amount;
+                else allTimeExpense += tx.amount;
+            });
+
+            const mainBalance = allTimeIncome - allTimeExpense;
+            const balanceEl = document.getElementById('main-balance');
+            balanceEl.innerText = formatRupiah(mainBalance);
+            
+            // Efek warna merah jika kas defisit (minus)
+            if(mainBalance < 0) {
+                balanceEl.classList.add('text-red-400');
+                balanceEl.classList.remove('text-white');
+            } else {
+                balanceEl.classList.add('text-white');
+                balanceEl.classList.remove('text-red-400');
+            }
+
+            // 2. Hitung berdasarkan Tahun untuk Kotak Pemasukan & Pengeluaran
+            const filteredTx = catFilteredTx.filter(tx => tx.date.substring(0,4) === filterYear);
 
             filteredTx.forEach(tx => {
                 if (tx.type === 'masuk') income += tx.amount;
