@@ -11,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -1213,19 +1214,59 @@ let pdfPreviewUrl=null;
 
         function createPDFReport(){
             const { jsPDF } = window.jspdf;
-            const doc=new jsPDF();
+            const doc = new jsPDF('landscape','mm','a4');
+
+            const rows = getReportRows();
+            const pageWidth = doc.internal.pageSize.getWidth();
+
             doc.setFontSize(16);
-            doc.text('SAKTY - Laporan Keuangan Yayasan',14,20);
+            doc.text('SAKTY - Laporan Keuangan Yayasan', 14, 18);
+
+            doc.setFontSize(11);
+            doc.text('PONPES ISLAM SALAFIYAH ABU ZAIRI', 14, 26);
+
             doc.setFontSize(10);
-            doc.text('PONPES ISLAM SALAFIYAH ABU ZAIRI',14,28);
-            let y=40;
-            doc.text('Tanggal | Kategori | Keterangan | Tipe | Nominal',14,y);
-            y+=8;
-            getReportRows().forEach(t=>{
-                let line=`${t.date} | ${t.category||'Kas Umum'} | ${t.description} | ${t.type} | Rp ${Number(t.amount).toLocaleString('id-ID')}`;
-                doc.text(line.substring(0,110),14,y); y+=7;
-                if(y>280){doc.addPage(); y=20;}
-            });
+            doc.text(
+                'Periode: ' + document.getElementById('report-year').value,
+                14,
+                34
+            );
+
+            const tableData = rows.map((t, index)=>[
+                index + 1,
+                t.date,
+                t.category || 'Kas Umum',
+                t.description,
+                t.type === 'masuk' ? 'Pemasukan' : 'Pengeluaran',
+                'Rp ' + Number(t.amount).toLocaleString('id-ID')
+            ]);
+
+            if(typeof doc.autoTable === 'function'){
+                doc.autoTable({
+                    startY: 42,
+                    head: [['No','Tanggal','Kategori','Keterangan','Jenis','Nominal']],
+                    body: tableData,
+                    theme:'grid',
+                    styles:{
+                        fontSize:9,
+                        cellPadding:3
+                    },
+                    headStyles:{
+                        fillColor:[13,148,136],
+                        textColor:255,
+                        fontStyle:'bold'
+                    },
+                    columnStyles:{
+                        0:{cellWidth:12},
+                        1:{cellWidth:28},
+                        2:{cellWidth:35},
+                        3:{cellWidth:80},
+                        4:{cellWidth:35},
+                        5:{halign:'right'}
+                    }
+                });
+            }
+
             return doc;
         }
 
@@ -1251,12 +1292,39 @@ let pdfPreviewUrl=null;
         }
 
         function exportExcelReport(){
-            const rows=[['Tanggal','Kategori','Keterangan','Tipe','Nominal']];
-            getReportRows().forEach(t=>rows.push([t.date,t.category||'Kas Umum',t.description,t.type,Number(t.amount)]));
-            const ws=XLSX.utils.aoa_to_sheet(rows);
-            const wb=XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb,ws,'Laporan');
-            XLSX.writeFile(wb,`Laporan_SAKTY_${Date.now()}.xlsx`);
+            const rows = [
+                ['No','Tanggal','Kategori','Keterangan','Jenis','Nominal']
+            ];
+
+            getReportRows().forEach((t,i)=>{
+                rows.push([
+                    i+1,
+                    t.date,
+                    t.category || 'Kas Umum',
+                    t.description,
+                    t.type === 'masuk' ? 'Pemasukan' : 'Pengeluaran',
+                    Number(t.amount)
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+
+            ws['!cols'] = [
+                {wch:6},
+                {wch:15},
+                {wch:20},
+                {wch:35},
+                {wch:18},
+                {wch:18}
+            ];
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Laporan Keuangan');
+
+            XLSX.writeFile(
+                wb,
+                `Laporan_SAKTY_${Date.now()}.xlsx`
+            );
         }
     </script>
 <script>
