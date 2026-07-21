@@ -73,7 +73,7 @@
         .custom-select-btn { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; min-height:42px; padding:10px 14px; border-radius:14px; background:white; border:1px solid #e2e8f0; color:#334155; font-size:14px; font-weight:700; cursor:pointer; transition:.2s; }
         .custom-select-btn:hover,.custom-select-btn.active { border-color:#14b8a6; box-shadow:0 0 0 3px rgba(20,184,166,.12); }
         .dark .custom-select-btn { background:#1e293b; border-color:#334155; color:white; }
-        .custom-select-menu { position:absolute; z-index:100; left:0; right:0; top:calc(100% + 8px); max-height:220px; overflow-y:auto; background:white; border:1px solid #e2e8f0; border-radius:16px; padding:6px; box-shadow:0 15px 35px rgba(15,23,42,.18); display:none; }
+        .custom-select-menu { position:absolute; z-index:100; left:0; right:0; top:calc(100% + 8px); max-height:220px; overflow-y:auto; background:white; border:1px solid #e2e8f0; border-radius:16px; padding:6px; box-shadow:0 15px 35px rgba(15,23,42,.18); display:none; z-index:9999; }
         .custom-select-menu.show { display:block; animation:dropIn .15s ease; }
         .dark .custom-select-menu { background:#0f172a; border-color:#334155; }
         .custom-option { padding:10px 12px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; color:#334155; }
@@ -320,7 +320,7 @@
                                 <h3 class="font-extrabold text-slate-800 dark:text-white text-lg">Rekap & Laporan</h3>
                                 <p class="text-xs text-slate-500 font-medium">Berdasarkan filter terpilih</p>
                             </div>
-                            <div class="flex flex-row items-center gap-2 w-full overflow-hidden">
+                            <div class="flex flex-row items-center gap-2 w-full overflow-visible relative z-30">
                                 <select id="report-category-filter" class="sakty-select flex-1 min-w-0 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 md:px-3 py-2 text-sm font-semibold outline-none dark:text-white focus:ring-2 focus:ring-teal-500"></select>
                                 <select id="report-year" class="sakty-select w-24 md:w-auto bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 md:px-3 py-2 text-sm font-semibold outline-none dark:text-white focus:ring-2 focus:ring-teal-500"></select>
                                 <select id="report-month" class="sakty-select w-28 md:w-auto bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 md:px-3 py-2 text-sm font-semibold outline-none dark:text-white focus:ring-2 focus:ring-teal-500">
