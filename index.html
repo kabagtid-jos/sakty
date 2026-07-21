@@ -32,6 +32,40 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         .dark .glass-panel { background: rgba(15, 23, 42, 0.95); }
+        /* Modern Select Dropdown SAKTY */
+        .sakty-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: linear-gradient(45deg, transparent 50%, #0d9488 50%), linear-gradient(135deg, #0d9488 50%, transparent 50%);
+            background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%;
+            background-size: 5px 5px, 5px 5px;
+            background-repeat: no-repeat;
+            transition: all .25s ease;
+        }
+        .sakty-select:hover {
+            border-color: #14b8a6;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(13,148,136,.12);
+        }
+        .sakty-select:focus {
+            border-color: #0d9488 !important;
+            box-shadow: 0 0 0 3px rgba(13,148,136,.18);
+        }
+        .dark .sakty-select {
+            background-color: #1e293b;
+            border-color: #334155;
+            background-image: linear-gradient(45deg, transparent 50%, #2dd4bf 50%), linear-gradient(135deg, #2dd4bf 50%, transparent 50%);
+        }
+        select option {
+            padding: 12px;
+            background: white;
+            color: #1e293b;
+        }
+        .dark select option {
+            background: #0f172a;
+            color: white;
+        }
+
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-300">
@@ -143,8 +177,8 @@
                     
                     <!-- Filter Kategori & Tahun di Kanan Atas -->
                     <div class="flex flex-row justify-end items-center gap-2 w-full">
-                        <select id="home-category-filter" class="flex-1 min-w-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white text-sm rounded-xl px-2 md:px-4 py-2 font-semibold focus:ring-2 focus:ring-teal-500 outline-none shadow-sm cursor-pointer transition-colors"></select>
-                        <select id="home-year-filter" class="w-28 md:w-32 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white text-sm rounded-xl px-2 md:px-4 py-2 font-semibold focus:ring-2 focus:ring-teal-500 outline-none shadow-sm cursor-pointer transition-colors"></select>
+                        <select id="home-category-filter" class="sakty-select flex-1 min-w-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white text-sm rounded-xl px-2 md:px-4 py-2 font-semibold focus:ring-2 focus:ring-teal-500 outline-none shadow-sm cursor-pointer transition-colors"></select>
+                        <select id="home-year-filter" class="sakty-select w-28 md:w-32 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white text-sm rounded-xl px-2 md:px-4 py-2 font-semibold focus:ring-2 focus:ring-teal-500 outline-none shadow-sm cursor-pointer transition-colors"></select>
                     </div>
 
                     <!-- KARTU SALDO UTAMA (Dark Theme) -->
@@ -235,7 +269,7 @@
                             
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Kategori Kas</label>
-                                <select id="tx-category" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-teal-500 outline-none text-slate-800 dark:text-white transition-colors"></select>
+                                <select id="tx-category" class="sakty-select w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-teal-500 outline-none text-slate-800 dark:text-white transition-colors"></select>
                             </div>
 
                             <div>
@@ -272,9 +306,9 @@
                                 <p class="text-xs text-slate-500 font-medium">Berdasarkan filter terpilih</p>
                             </div>
                             <div class="flex flex-row items-center gap-2 w-full overflow-hidden">
-                                <select id="report-category-filter" class="flex-1 min-w-0 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 md:px-3 py-2 text-sm font-semibold outline-none dark:text-white focus:ring-2 focus:ring-teal-500"></select>
-                                <select id="report-year" class="w-24 md:w-auto bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 md:px-3 py-2 text-sm font-semibold outline-none dark:text-white focus:ring-2 focus:ring-teal-500"></select>
-                                <select id="report-month" class="w-28 md:w-auto bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 md:px-3 py-2 text-sm font-semibold outline-none dark:text-white focus:ring-2 focus:ring-teal-500">
+                                <select id="report-category-filter" class="sakty-select flex-1 min-w-0 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 md:px-3 py-2 text-sm font-semibold outline-none dark:text-white focus:ring-2 focus:ring-teal-500"></select>
+                                <select id="report-year" class="sakty-select w-24 md:w-auto bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 md:px-3 py-2 text-sm font-semibold outline-none dark:text-white focus:ring-2 focus:ring-teal-500"></select>
+                                <select id="report-month" class="sakty-select w-28 md:w-auto bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 md:px-3 py-2 text-sm font-semibold outline-none dark:text-white focus:ring-2 focus:ring-teal-500">
                                     <option value="all">Semua Bulan</option>
                                     <option value="01">Januari</option>
                                     <option value="02">Februari</option>
@@ -429,6 +463,18 @@
         let activeHomeCategory = "Semua Kategori";
         let cashflowChartInstance = null; // Instance Chart.js
 
+        // Mengatur tanggal transaksi otomatis ke hari ini
+        function setTodayDate() {
+            const dateInput = document.getElementById('tx-date');
+            if (dateInput) {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                dateInput.value = `${year}-${month}-${day}`;
+            }
+        }
+
         // Fungsi Toggle Password
         function togglePassword() {
             const input = document.getElementById('password-input');
@@ -468,7 +514,7 @@
 
         // Saat Halaman Dimuat
         document.addEventListener('DOMContentLoaded', async () => {
-            document.getElementById('tx-date').valueAsDate = new Date();
+            setTodayDate();
             
             if (supabaseClient) {
                 // Load Settings dari Database
@@ -744,7 +790,7 @@
             }
 
             document.getElementById('transaction-form').reset();
-            document.getElementById('tx-date').valueAsDate = new Date();
+            setTodayDate();
             await fetchData();
             Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Transaksi disimpan.', timer: 1500, showConfirmButton: false, customClass: { popup: 'rounded-3xl dark:bg-slate-900 dark:text-white' } });
             switchView('home');
