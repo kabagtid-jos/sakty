@@ -196,6 +196,14 @@
 }
 
 </style>
+
+<!-- PWA Configuration -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-300">
 
@@ -1548,5 +1556,16 @@ document.addEventListener('DOMContentLoaded',function(){
     },300);
 });
 </script>
+
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('SAKTY PWA aktif'))
+        .catch(err => console.log('PWA error:', err));
+    });
+}
+</script>
+
 </body>
 </html>
