@@ -14,33 +14,16 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9; /* slate-100 */
+            background-color: #f8fafc; /* slate-50 */
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* Mobile Container Layout */
-        .app-container {
-            max-width: 480px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            min-height: 100vh;
-            min-height: 100dvh;
-            position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.05);
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Smooth Transitions */
+        /* Smooth Transitions for Views */
         .view-section {
             display: none;
             opacity: 0;
             transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
             transform: translateY(10px);
-            flex: 1;
-            overflow-y: auto;
-            padding-bottom: 80px; /* Space for bottom nav */
         }
         
         .view-section.active {
@@ -50,31 +33,16 @@
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Bottom Nav Styling */
+        /* Mobile Bottom Nav Styling */
         .bottom-nav {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
-            border-top: 1px solid #e2e8f0;
-            padding-bottom: env(safe-area-inset-bottom); /* For iPhone notch */
-        }
-
-        .nav-item {
-            color: #94a3b8;
-            transition: all 0.2s ease;
-        }
-        .nav-item.active {
-            color: #059669; /* emerald-600 */
-        }
-        .nav-item.active i {
-            transform: translateY(-2px);
-            color: #059669;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         /* Card styles */
@@ -85,214 +53,314 @@
         }
         
         .transaction-card {
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         .transaction-card:active {
             transform: scale(0.98);
         }
+        @media (min-width: 768px) {
+            .transaction-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            }
+        }
     </style>
 </head>
-<body class="text-slate-800 antialiased selection:bg-emerald-200 selection:text-emerald-900">
+<body class="text-slate-800 antialiased selection:bg-emerald-200 selection:text-emerald-900 overflow-hidden h-screen flex">
 
-    <div class="app-container">
-        
-        <div id="login-view" class="flex flex-col items-center justify-center min-h-screen p-6 bg-slate-50 absolute inset-0 z-50 transition-opacity duration-500">
-            <div class="w-full max-w-sm space-y-8 bg-white p-8 rounded-3xl shadow-xl">
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="ph ph-mosque text-4xl text-emerald-600"></i>
-                    </div>
-                    <h1 class="text-2xl font-bold text-slate-800">SAKTY</h1>
-                    <p class="text-xs text-slate-500 mt-1">Sistem Akuntansi Kas Terpadu Yayasan<br>Ponpes Salafiyah Abu-Zairi</p>
+    <!-- LOGIN OVERLAY -->
+    <div id="login-view" class="fixed inset-0 flex flex-col items-center justify-center p-6 bg-slate-50 z-50 transition-opacity duration-500">
+        <div class="w-full max-w-md space-y-8 bg-white p-10 rounded-[2rem] shadow-xl border border-slate-100">
+            <div class="text-center">
+                <div class="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="ph ph-mosque text-5xl text-emerald-600"></i>
                 </div>
-
-                <form id="login-form" class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Kode Akses / Password</label>
-                        <div class="relative">
-                            <input type="password" id="password-input" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all" placeholder="Masukkan password" required>
-                            <i class="ph ph-lock-key absolute right-4 top-3.5 text-xl text-slate-400"></i>
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-emerald-200 transition-all active:scale-95">
-                        Masuk Sistem
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <header id="app-header" class="hidden flex justify-between items-center px-6 py-4 bg-white sticky top-0 z-40">
-            <div>
-                <h2 class="text-lg font-bold text-slate-800 tracking-tight">SAKTY</h2>
-                <p class="text-[10px] text-slate-500 font-medium">Ponpes Salafiyah Abu-Zairi</p>
-            </div>
-            <button onclick="logout()" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-red-50 hover:text-red-500 transition-colors">
-                <i class="ph ph-sign-out text-xl"></i>
-            </button>
-        </header>
-
-        <main id="view-home" class="view-section px-6 pt-2">
-            <!-- Saldo Card -->
-            <div class="glass-card rounded-3xl p-6 mb-8 relative overflow-hidden">
-                <div class="absolute top-0 right-0 opacity-10">
-                    <i class="ph ph-coins text-9xl -mt-4 -mr-4"></i>
-                </div>
-                <h3 class="text-emerald-50 font-medium text-sm mb-1 opacity-90">Total Saldo Kas</h3>
-                <h1 class="text-4xl font-bold tracking-tight mb-4" id="total-balance">Rp 0</h1>
-                
-                <div class="flex gap-4 pt-4 border-t border-emerald-500/30">
-                    <div class="flex-1">
-                        <p class="text-xs text-emerald-100 mb-1">Pemasukan Bulan Ini</p>
-                        <p class="text-sm font-semibold" id="monthly-income">Rp 0</p>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-xs text-emerald-100 mb-1">Pengeluaran Bulan Ini</p>
-                        <p class="text-sm font-semibold" id="monthly-expense">Rp 0</p>
-                    </div>
-                </div>
+                <h1 class="text-3xl font-bold text-slate-800 mb-2">SAKTY</h1>
+                <p class="text-sm text-slate-500 leading-relaxed">Sistem Akuntansi Kas Terpadu Yayasan<br><span class="font-medium text-slate-600">Ponpes Salafiyah Abu-Zairi</span></p>
             </div>
 
-            <!-- Recent Transactions -->
-            <div class="flex justify-between items-end mb-4">
-                <h3 class="font-bold text-slate-800 text-lg">Transaksi Terakhir</h3>
-                <button onclick="switchView('reports')" class="text-xs text-emerald-600 font-medium hover:underline">Lihat Semua</button>
-            </div>
-            
-            <div id="recent-transactions-list" class="space-y-3 pb-4">
-                <!-- Data akan di-render di sini -->
-            </div>
-        </main>
-
-        <main id="view-add" class="view-section px-6 pt-2">
-            <h2 class="text-2xl font-bold text-slate-800 mb-6">Tambah Transaksi</h2>
-            
-            <form id="transaction-form" class="space-y-5">
-                <!-- Jenis Transaksi (Toggle) -->
-                <div class="bg-slate-100 p-1 rounded-xl flex">
-                    <label class="flex-1 cursor-pointer">
-                        <input type="radio" name="type" value="masuk" class="peer sr-only" checked>
-                        <div class="text-center py-2 rounded-lg text-sm font-medium transition-all peer-checked:bg-white peer-checked:text-emerald-600 peer-checked:shadow-sm text-slate-500">
-                            Pemasukan
-                        </div>
-                    </label>
-                    <label class="flex-1 cursor-pointer">
-                        <input type="radio" name="type" value="keluar" class="peer sr-only">
-                        <div class="text-center py-2 rounded-lg text-sm font-medium transition-all peer-checked:bg-white peer-checked:text-red-600 peer-checked:shadow-sm text-slate-500">
-                            Pengeluaran
-                        </div>
-                    </label>
-                </div>
-
-                <!-- Nominal -->
+            <form id="login-form" class="space-y-6 pt-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Nominal (Rp)</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Kode Akses / Password</label>
                     <div class="relative">
-                        <span class="absolute left-4 top-3.5 text-slate-500 font-medium">Rp</span>
-                        <input type="number" id="tx-amount" class="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all" placeholder="0" required>
+                        <input type="password" id="password-input" class="w-full px-5 py-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-lg" placeholder="Masukkan password" required>
+                        <i class="ph ph-lock-key absolute right-5 top-4 text-2xl text-slate-400"></i>
                     </div>
                 </div>
-
-                <!-- Tanggal -->
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Tanggal</label>
-                    <input type="date" id="tx-date" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all" required>
-                </div>
-
-                <!-- Keterangan -->
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Keterangan / Deskripsi</label>
-                    <textarea id="tx-desc" rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all" placeholder="Contoh: Infaq donatur hamba Allah" required></textarea>
-                </div>
-
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-emerald-200 transition-all active:scale-95 mt-4">
-                    Simpan Data
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-xl shadow-lg shadow-emerald-200 transition-all active:scale-95 text-lg">
+                    Masuk Sistem
                 </button>
             </form>
-        </main>
+        </div>
+    </div>
 
-        <main id="view-reports" class="view-section px-6 pt-2">
-            <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Kas</h2>
-            
-            <!-- Tabs Laporan -->
-            <div class="flex gap-4 border-b border-slate-200 mb-6">
-                <button onclick="setReportTab('monthly')" id="tab-monthly" class="pb-3 text-sm font-medium border-b-2 border-emerald-600 text-emerald-600 transition-colors">Rekap Bulanan</button>
-                <button onclick="setReportTab('yearly')" id="tab-yearly" class="pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors">Rekap Tahunan</button>
+    <!-- MAIN APP LAYOUT (Hidden by default until logged in) -->
+    <div id="app-layout" class="hidden w-full h-full flex flex-col md:flex-row">
+        
+        <!-- SIDEBAR (DESKTOP ONLY) -->
+        <aside class="hidden md:flex flex-col w-72 bg-white border-r border-slate-200 h-full shadow-sm z-30">
+            <div class="p-8 pb-4 border-b border-slate-100 flex items-center gap-4">
+                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center shrink-0">
+                    <i class="ph ph-mosque text-2xl text-emerald-600"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800 tracking-tight">SAKTY</h2>
+                    <p class="text-xs text-slate-500 font-medium truncate w-40">Salafiyah Abu-Zairi</p>
+                </div>
             </div>
-
-            <!-- Konten Laporan -->
-            <div id="report-content" class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <!-- Tabel akan di generate JS -->
-            </div>
             
-            <button onclick="exportToCSV()" class="mt-6 w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 text-white font-medium py-3 rounded-xl transition-all active:scale-95">
-                <i class="ph ph-download-simple text-lg"></i>
-                Download Data (CSV)
-            </button>
-        </main>
-
-        <nav id="bottom-nav" class="hidden bottom-nav z-40">
-            <div class="flex justify-around items-center pt-3 pb-2 px-2">
-                <button onclick="switchView('home')" id="nav-home" class="nav-item active flex flex-col items-center w-16 gap-1">
-                    <i class="ph-fill ph-house text-2xl transition-transform duration-300"></i>
-                    <span class="text-[10px] font-medium">Beranda</span>
+            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+                <button onclick="switchView('home')" id="nav-home-desktop" class="nav-item-desktop w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-emerald-600 transition-all text-left font-medium">
+                    <i class="ph ph-house text-2xl"></i>
+                    <span>Beranda</span>
                 </button>
-                
-                <button onclick="switchView('add')" id="nav-add" class="nav-item flex flex-col items-center w-16 gap-1 -mt-6 relative">
-                    <div class="bg-emerald-600 text-white p-3 rounded-full shadow-lg shadow-emerald-200 border-4 border-white transition-transform duration-300 hover:scale-105 active:scale-95">
-                        <i class="ph-bold ph-plus text-xl"></i>
-                    </div>
-                    <span class="text-[10px] font-medium text-slate-500">Tambah</span>
+                <button onclick="switchView('add')" id="nav-add-desktop" class="nav-item-desktop w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-emerald-600 transition-all text-left font-medium">
+                    <i class="ph ph-plus-circle text-2xl"></i>
+                    <span>Tambah Transaksi</span>
                 </button>
-
-                <button onclick="switchView('reports')" id="nav-reports" class="nav-item flex flex-col items-center w-16 gap-1">
-                    <i class="ph-fill ph-chart-bar text-2xl transition-transform duration-300"></i>
-                    <span class="text-[10px] font-medium">Laporan</span>
+                <button onclick="switchView('reports')" id="nav-reports-desktop" class="nav-item-desktop w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-emerald-600 transition-all text-left font-medium">
+                    <i class="ph ph-chart-bar text-2xl"></i>
+                    <span>Laporan & Rekap</span>
                 </button>
-
-                <a href="https://drive.google.com/drive/folders/1NUnSmL5_Xyt7rQuTgw0Zx-V6Zjvhovgf?usp=drive_link" target="_blank" class="nav-item flex flex-col items-center w-16 gap-1 text-slate-400 hover:text-blue-500 transition-colors">
-                    <i class="ph-fill ph-google-drive-logo text-2xl"></i>
-                    <span class="text-[10px] font-medium">Drive</span>
+                <a href="https://drive.google.com/drive/folders/1NUnSmL5_Xyt7rQuTgw0Zx-V6Zjvhovgf?usp=drive_link" target="_blank" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-all text-left font-medium">
+                    <i class="ph ph-google-drive-logo text-2xl"></i>
+                    <span>Google Drive</span>
                 </a>
-            </div>
-        </nav>
+            </nav>
 
+            <div class="p-4 border-t border-slate-100">
+                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-all font-medium">
+                    <i class="ph ph-sign-out text-xl"></i>
+                    <span>Keluar Sistem</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA (Mobile & Desktop) -->
+        <div class="flex-1 flex flex-col relative h-full overflow-hidden bg-slate-50 md:bg-[#f1f5f9]">
+            
+            <!-- MOBILE HEADER (HIDDEN ON DESKTOP) -->
+            <header class="md:hidden flex justify-between items-center px-6 py-4 bg-white sticky top-0 z-20 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center shrink-0">
+                        <i class="ph ph-mosque text-emerald-600"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 tracking-tight leading-none">SAKTY</h2>
+                        <p class="text-[10px] text-slate-500 font-medium mt-1">Salafiyah Abu-Zairi</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:text-red-500 active:scale-95 transition-all">
+                    <i class="ph ph-sign-out text-xl"></i>
+                </button>
+            </header>
+
+            <!-- VIEWS CONTAINER -->
+            <div class="flex-1 overflow-y-auto w-full pb-24 md:pb-8 p-4 md:p-8">
+                <div class="max-w-5xl mx-auto w-full">
+                    
+                    <!-- BERANDA VIEW -->
+                    <main id="view-home" class="view-section">
+                        <!-- Desktop Header Title -->
+                        <div class="hidden md:flex justify-between items-end mb-6">
+                            <div>
+                                <h2 class="text-2xl font-bold text-slate-800">Ringkasan Keuangan</h2>
+                                <p class="text-sm text-slate-500 mt-1">Pantau arus kas Yayasan secara real-time</p>
+                            </div>
+                            <p class="text-sm font-medium text-slate-500 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-100" id="current-date-display"></p>
+                        </div>
+
+                        <!-- Saldo Card -->
+                        <div class="glass-card rounded-3xl p-6 md:p-8 mb-8 md:mb-10 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 opacity-10 md:opacity-20 transform md:scale-150 md:translate-x-10 md:-translate-y-10">
+                                <i class="ph ph-coins text-9xl -mt-4 -mr-4"></i>
+                            </div>
+                            <h3 class="text-emerald-50 font-medium text-sm md:text-base mb-1 md:mb-2 opacity-90">Total Saldo Kas Yayasan</h3>
+                            <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-6" id="total-balance">Rp 0</h1>
+                            
+                            <div class="flex flex-col sm:flex-row gap-4 pt-5 border-t border-emerald-500/30">
+                                <div class="flex-1 bg-white/10 p-4 rounded-2xl backdrop-blur-sm">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <i class="ph ph-trend-up text-emerald-200"></i>
+                                        <p class="text-xs md:text-sm text-emerald-50">Pemasukan Bulan Ini</p>
+                                    </div>
+                                    <p class="text-lg md:text-xl font-semibold" id="monthly-income">Rp 0</p>
+                                </div>
+                                <div class="flex-1 bg-white/10 p-4 rounded-2xl backdrop-blur-sm">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <i class="ph ph-trend-down text-emerald-200"></i>
+                                        <p class="text-xs md:text-sm text-emerald-50">Pengeluaran Bulan Ini</p>
+                                    </div>
+                                    <p class="text-lg md:text-xl font-semibold" id="monthly-expense">Rp 0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Transactions -->
+                        <div class="bg-white md:p-6 md:rounded-3xl md:shadow-sm md:border md:border-slate-100">
+                            <div class="flex justify-between items-end mb-4 px-2 md:px-0">
+                                <h3 class="font-bold text-slate-800 text-lg md:text-xl">Transaksi Terakhir</h3>
+                                <button onclick="switchView('reports')" class="text-sm text-emerald-600 font-medium hover:underline flex items-center gap-1">
+                                    Lihat Semua <i class="ph ph-arrow-right"></i>
+                                </button>
+                            </div>
+                            
+                            <div id="recent-transactions-list" class="space-y-3">
+                                <!-- Data render here -->
+                            </div>
+                        </div>
+                    </main>
+
+                    <!-- TAMBAH TRANSAKSI VIEW -->
+                    <main id="view-add" class="view-section">
+                        <div class="max-w-2xl mx-auto bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100">
+                            <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-2">Tambah Transaksi</h2>
+                            <p class="text-sm text-slate-500 mb-8">Masukkan data pemasukan atau pengeluaran kas.</p>
+                            
+                            <form id="transaction-form" class="space-y-6">
+                                <!-- Jenis Transaksi (Toggle) -->
+                                <div class="bg-slate-100 p-1.5 rounded-2xl flex">
+                                    <label class="flex-1 cursor-pointer">
+                                        <input type="radio" name="type" value="masuk" class="peer sr-only" checked>
+                                        <div class="text-center py-3 rounded-xl text-sm font-semibold transition-all peer-checked:bg-white peer-checked:text-emerald-600 peer-checked:shadow-sm text-slate-500">
+                                            <i class="ph ph-trend-up mr-1"></i> Pemasukan
+                                        </div>
+                                    </label>
+                                    <label class="flex-1 cursor-pointer">
+                                        <input type="radio" name="type" value="keluar" class="peer sr-only">
+                                        <div class="text-center py-3 rounded-xl text-sm font-semibold transition-all peer-checked:bg-white peer-checked:text-red-600 peer-checked:shadow-sm text-slate-500">
+                                            <i class="ph ph-trend-down mr-1"></i> Pengeluaran
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <!-- Nominal -->
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Nominal (Rp)</label>
+                                    <div class="relative">
+                                        <span class="absolute left-5 top-4 text-slate-500 font-bold">Rp</span>
+                                        <input type="number" id="tx-amount" class="w-full pl-14 pr-5 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-lg font-medium" placeholder="0" required>
+                                    </div>
+                                </div>
+
+                                <!-- Grid untuk Tanggal & Kategori/Deskripsi di Desktop -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Tanggal -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">Tanggal</label>
+                                        <input type="date" id="tx-date" class="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all" required>
+                                    </div>
+                                    <!-- Keterangan -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">Keterangan / Deskripsi</label>
+                                        <textarea id="tx-desc" rows="1" class="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all md:h-[58px]" placeholder="Contoh: Infaq donatur" required></textarea>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all active:scale-95 mt-4 text-lg flex items-center justify-center gap-2">
+                                    <i class="ph ph-floppy-disk text-xl"></i> Simpan Transaksi
+                                </button>
+                            </form>
+                        </div>
+                    </main>
+
+                    <!-- LAPORAN VIEW -->
+                    <main id="view-reports" class="view-section">
+                        <div class="bg-white md:p-8 rounded-3xl md:shadow-sm md:border md:border-slate-100">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                                <div>
+                                    <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Laporan Kas</h2>
+                                    <p class="text-sm text-slate-500 mt-1">Rekapitulasi keuangan bulanan dan tahunan</p>
+                                </div>
+                                <button onclick="exportToCSV()" class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 text-white font-medium px-5 py-3 rounded-xl transition-all active:scale-95 text-sm">
+                                    <i class="ph ph-file-csv text-lg"></i>
+                                    Download CSV
+                                </button>
+                            </div>
+                            
+                            <!-- Tabs Laporan -->
+                            <div class="flex gap-4 border-b border-slate-200 mb-6 px-1">
+                                <button onclick="setReportTab('monthly')" id="tab-monthly" class="pb-3 text-sm md:text-base font-semibold border-b-2 border-emerald-600 text-emerald-600 transition-colors">Rekap Bulanan</button>
+                                <button onclick="setReportTab('yearly')" id="tab-yearly" class="pb-3 text-sm md:text-base font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors">Rekap Tahunan</button>
+                            </div>
+
+                            <!-- Konten Laporan -->
+                            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-x-auto">
+                                <div id="report-content" class="min-w-[600px]">
+                                    <!-- Tabel akan di generate JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+
+                </div>
+            </div>
+
+            <!-- BOTTOM NAVIGATION (MOBILE ONLY) -->
+            <nav class="md:hidden fixed bottom-0 w-full bottom-nav border-t border-slate-200 z-30">
+                <div class="flex justify-around items-center pt-3 pb-2 px-2 max-w-md mx-auto">
+                    <button onclick="switchView('home')" id="nav-home-mobile" class="nav-item-mobile text-emerald-600 flex flex-col items-center w-16 gap-1">
+                        <i class="ph-fill ph-house text-2xl transition-transform duration-300"></i>
+                        <span class="text-[10px] font-medium">Beranda</span>
+                    </button>
+                    
+                    <button onclick="switchView('add')" id="nav-add-mobile" class="nav-item-mobile flex flex-col items-center w-16 gap-1 -mt-7 relative">
+                        <div class="bg-emerald-600 text-white p-3 rounded-full shadow-lg shadow-emerald-200 border-4 border-slate-50 transition-transform duration-300 hover:scale-105 active:scale-95">
+                            <i class="ph-bold ph-plus text-xl"></i>
+                        </div>
+                        <span class="text-[10px] font-medium text-slate-500 mt-1">Tambah</span>
+                    </button>
+
+                    <button onclick="switchView('reports')" id="nav-reports-mobile" class="nav-item-mobile text-slate-400 flex flex-col items-center w-16 gap-1">
+                        <i class="ph ph-chart-bar text-2xl transition-transform duration-300"></i>
+                        <span class="text-[10px] font-medium">Laporan</span>
+                    </button>
+
+                    <a href="https://drive.google.com/drive/folders/1NUnSmL5_Xyt7rQuTgw0Zx-V6Zjvhovgf?usp=drive_link" target="_blank" class="flex flex-col items-center w-16 gap-1 text-slate-400 hover:text-blue-500 transition-colors">
+                        <i class="ph ph-google-drive-logo text-2xl"></i>
+                        <span class="text-[10px] font-medium">Drive</span>
+                    </a>
+                </div>
+            </nav>
+
+        </div>
     </div>
 
     <script>
         /**
          * KONFIGURASI SUPABASE
-         * Ganti URL dan KEY dengan kredensial dari project Supabase Anda.
          */
-        const SUPABASE_URL = 'https://dkcmthggilaplyxvhnpp.supabase.co'; // Ganti dengan URL Supabase
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrY210aGdnaWxhcGx5eHZobnBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MTc5MTgsImV4cCI6MjEwMDE5MzkxOH0.TpSIk3T4I6r-SBC7Uqlwq8-VOf3IslSjWxx681r-tpI'; // Ganti dengan Anon Key Supabase
+        const SUPABASE_URL = 'https://dkcmthggilaplyxvhnpp.supabase.co'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrY210aGdnaWxhcGx5eHZobnBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MTc5MTgsImV4cCI6MjEwMDE5MzkxOH0.TpSIk3T4I6r-SBC7Uqlwq8-VOf3IslSjWxx681r-tpI'; 
         
         let supabaseClient = null;
         let isDemoMode = false;
 
-        // Cek jika kredensial belum diisi, gunakan Demo Mode (LocalStorage)
-        if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+        if (SUPABASE_URL === 'PASTE_PROJECT_URL_DI_SINI') {
             isDemoMode = true;
-            console.log("Menjalankan Demo Mode (LocalStorage) karena kredensial Supabase belum diatur.");
+            console.log("Mode Demo (Offline) Aktif.");
         } else {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log("Terkoneksi ke Supabase.");
         }
 
         // Variabel State
         let transactions = [];
-        const CUSTOM_PASSWORD = "salafiyahjaya"; // Password standar untuk masuk (bisa diganti)
+        const CUSTOM_PASSWORD = "salafiyahjaya"; 
         let currentReportMode = 'monthly';
 
         // Inisialisasi Aplikasi
         document.addEventListener('DOMContentLoaded', () => {
-            // Set default date to today
             document.getElementById('tx-date').valueAsDate = new Date();
             
-            // Cek Session
+            // Set Tanggal Header Desktop
+            const dateDisplay = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+            document.getElementById('current-date-display').innerText = dateDisplay;
+            
             if(sessionStorage.getItem('sakty_logged_in') === 'true') {
                 showApp();
             }
 
-            // Event Listeners
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             document.getElementById('transaction-form').addEventListener('submit', handleAddTransaction);
         });
@@ -310,7 +378,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Akses Ditolak',
-                    text: 'Password yang Anda masukkan salah.',
+                    text: 'Password salah.',
                     confirmButtonColor: '#059669',
                     customClass: { popup: 'rounded-3xl' }
                 });
@@ -319,8 +387,8 @@
 
         function logout() {
             sessionStorage.removeItem('sakty_logged_in');
-            document.getElementById('app-header').classList.add('hidden');
-            document.getElementById('bottom-nav').classList.add('hidden');
+            document.getElementById('app-layout').classList.add('hidden');
+            document.getElementById('app-layout').classList.remove('flex');
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             
             const loginView = document.getElementById('login-view');
@@ -334,42 +402,58 @@
             
             setTimeout(() => {
                 loginView.style.display = 'none';
-                document.getElementById('app-header').classList.remove('hidden');
-                document.getElementById('bottom-nav').classList.remove('hidden');
+                document.getElementById('app-layout').classList.remove('hidden');
+                document.getElementById('app-layout').classList.add('flex');
                 
-                loadData(); // Load data saat masuk
+                loadData(); 
                 switchView('home');
             }, 300);
         }
 
-        /* --- LOGIKA NAVIGASI --- */
+        /* --- LOGIKA NAVIGASI (MOBILE & DESKTOP) --- */
         function switchView(viewId) {
-            // Update Active Nav Icon
-            document.querySelectorAll('.nav-item').forEach(el => {
-                if(el.id !== 'nav-add') { // Pengecualian styling tombol tambah
-                    el.classList.remove('active');
+            // Reset Mobile Nav
+            document.querySelectorAll('.nav-item-mobile').forEach(el => {
+                if(el.id !== 'nav-add-mobile') { 
+                    el.classList.remove('text-emerald-600');
+                    el.classList.add('text-slate-400');
                     el.querySelector('i').classList.replace('ph-fill', 'ph');
                 }
             });
             
+            // Reset Desktop Nav
+            document.querySelectorAll('.nav-item-desktop').forEach(el => {
+                el.classList.remove('bg-emerald-50', 'text-emerald-600');
+                el.classList.add('text-slate-500');
+                el.querySelector('i').classList.replace('ph-fill', 'ph');
+            });
+
+            // Set Active Mobile
             if(viewId !== 'add') {
-                const activeNav = document.getElementById(`nav-${viewId}`);
-                if(activeNav) {
-                    activeNav.classList.add('active');
-                    activeNav.querySelector('i').classList.replace('ph', 'ph-fill');
+                const mobActive = document.getElementById(`nav-${viewId}-mobile`);
+                if(mobActive) {
+                    mobActive.classList.replace('text-slate-400', 'text-emerald-600');
+                    mobActive.querySelector('i').classList.replace('ph', 'ph-fill');
                 }
+            }
+            
+            // Set Active Desktop
+            const deskActive = document.getElementById(`nav-${viewId}-desktop`);
+            if(deskActive) {
+                deskActive.classList.remove('text-slate-500');
+                deskActive.classList.add('bg-emerald-50', 'text-emerald-600');
+                deskActive.querySelector('i').classList.replace('ph', 'ph-fill');
             }
 
             // Animate Views
             document.querySelectorAll('.view-section').forEach(el => {
                 el.classList.remove('active');
-                setTimeout(() => el.style.display = 'none', 300); // Wait for transition
+                setTimeout(() => el.style.display = 'none', 300); 
             });
 
             const activeView = document.getElementById(`view-${viewId}`);
             setTimeout(() => {
                 activeView.style.display = 'block';
-                // Trigger reflow
                 void activeView.offsetWidth; 
                 activeView.classList.add('active');
             }, 310);
@@ -385,7 +469,6 @@
                 if (stored) {
                     transactions = JSON.parse(stored);
                 } else {
-                    // Seed dummy data
                     transactions = [
                         { id: 1, type: 'masuk', amount: 5000000, description: 'Saldo Awal Yayasan', date: new Date().toISOString(), created_at: new Date().toISOString() }
                     ];
@@ -401,7 +484,8 @@
                     if (error) throw error;
                     transactions = data || [];
                 } catch (error) {
-                    Swal.fire('Error', 'Gagal memuat data dari database.', 'error');
+                    console.error("Supabase Error:", error);
+                    Swal.fire('Error', 'Gagal memuat data dari database. Pastikan tabel telah dibuat di Supabase.', 'error');
                 }
             }
             renderHome();
@@ -422,7 +506,7 @@
             if(!amount || !date || !desc) return;
 
             const newTx = {
-                id: isDemoMode ? Date.now() : undefined, // Supabase generates ID if undefined
+                id: isDemoMode ? Date.now() : undefined,
                 type: type,
                 amount: amount,
                 description: desc,
@@ -430,7 +514,6 @@
                 created_at: new Date().toISOString()
             };
 
-            // Loading state
             Swal.fire({ title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
 
             if (isDemoMode) {
@@ -441,9 +524,10 @@
                 try {
                     const { data, error } = await supabaseClient.from('transactions').insert([newTx]).select();
                     if (error) throw error;
-                    transactions.unshift(data[0]); // Add to local array
+                    transactions.unshift(data[0]); 
                     finishAdd();
                 } catch (error) {
+                    console.error("Supabase Error:", error);
                     Swal.fire('Error', 'Gagal menyimpan transaksi.', 'error');
                 }
             }
@@ -520,7 +604,6 @@
             const listEl = document.getElementById('recent-transactions-list');
             listEl.innerHTML = '';
 
-            // Hitung total dan render 5 data terakhir
             transactions.forEach((tx, index) => {
                 const txDate = new Date(tx.date);
                 
@@ -532,7 +615,7 @@
                     if(txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear) monthKeluar += tx.amount;
                 }
 
-                if (index < 5) {
+                if (index < 10) { // Render 10 data di desktop/mobile
                     const isMasuk = tx.type === 'masuk';
                     const icon = isMasuk ? 'ph-arrow-down-left text-emerald-500 bg-emerald-50' : 'ph-arrow-up-right text-red-500 bg-red-50';
                     const sign = isMasuk ? '+' : '-';
@@ -541,18 +624,20 @@
                     const item = document.createElement('div');
                     item.className = 'transaction-card bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between gap-3';
                     item.innerHTML = `
-                        <div class="flex items-center gap-3 overflow-hidden">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${icon.split(' ')[2]}">
-                                <i class="ph-bold ${icon.split(' ')[0]} text-lg ${icon.split(' ')[1]}"></i>
+                        <div class="flex items-center gap-4 overflow-hidden">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${icon.split(' ')[2]}">
+                                <i class="ph-bold ${icon.split(' ')[0]} text-xl ${icon.split(' ')[1]}"></i>
                             </div>
                             <div class="truncate">
-                                <p class="text-sm font-semibold text-slate-800 truncate">${tx.description}</p>
-                                <p class="text-[11px] text-slate-400">${formatDate(tx.date)}</p>
+                                <p class="text-base font-semibold text-slate-800 truncate">${tx.description}</p>
+                                <p class="text-xs text-slate-500 mt-0.5">${formatDate(tx.date)}</p>
                             </div>
                         </div>
                         <div class="text-right shrink-0 flex flex-col items-end">
-                            <p class="text-sm font-bold ${color}">${sign}${formatRp(tx.amount).replace('Rp', '')}</p>
-                            <button onclick="deleteTransaction(${tx.id})" class="text-[10px] text-red-400 hover:text-red-600 mt-1"><i class="ph-fill ph-trash"></i> Hapus</button>
+                            <p class="text-base font-bold ${color}">${sign}${formatRp(tx.amount).replace('Rp', '')}</p>
+                            <button onclick="deleteTransaction(${tx.id})" class="text-xs text-red-400 hover:text-red-600 mt-1 font-medium flex items-center gap-1">
+                                <i class="ph-fill ph-trash"></i> <span class="hidden md:inline">Hapus</span>
+                            </button>
                         </div>
                     `;
                     listEl.appendChild(item);
@@ -560,7 +645,7 @@
             });
 
             if(transactions.length === 0) {
-                listEl.innerHTML = `<div class="text-center py-6 text-sm text-slate-400">Belum ada transaksi.</div>`;
+                listEl.innerHTML = `<div class="text-center py-10 text-sm text-slate-400 border-2 border-dashed border-slate-200 rounded-2xl">Belum ada transaksi bulan ini.</div>`;
             }
 
             document.getElementById('total-balance').innerText = formatRp(totalMasuk - totalKeluar);
@@ -595,10 +680,10 @@
                 let label = '';
                 
                 if (currentReportMode === 'monthly') {
-                    key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; // YYYY-MM
+                    key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; 
                     label = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(d);
                 } else {
-                    key = `${d.getFullYear()}`; // YYYY
+                    key = `${d.getFullYear()}`; 
                     label = `Tahun ${d.getFullYear()}`;
                 }
 
@@ -610,34 +695,33 @@
                 if (tx.type === 'keluar') groupedData[key].keluar += tx.amount;
             });
 
-            // Urutkan key dari terbaru
             const sortedKeys = Object.keys(groupedData).sort().reverse();
             
             let html = `
-                <table class="w-full text-left text-sm text-slate-600">
+                <table class="w-full text-left text-sm md:text-base text-slate-600">
                     <thead class="bg-slate-50 text-slate-500 border-b border-slate-100">
                         <tr>
-                            <th class="px-4 py-3 font-medium">Periode</th>
-                            <th class="px-4 py-3 font-medium text-right">Pemasukan</th>
-                            <th class="px-4 py-3 font-medium text-right">Pengeluaran</th>
-                            <th class="px-4 py-3 font-medium text-right text-emerald-600">Saldo</th>
+                            <th class="px-5 py-4 font-medium">Periode</th>
+                            <th class="px-5 py-4 font-medium text-right">Total Pemasukan</th>
+                            <th class="px-5 py-4 font-medium text-right">Total Pengeluaran</th>
+                            <th class="px-5 py-4 font-medium text-right text-emerald-600">Saldo Akhir</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
             `;
 
             if(sortedKeys.length === 0) {
-                html += `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400">Belum ada data laporan.</td></tr>`;
+                html += `<tr><td colspan="4" class="px-5 py-10 text-center text-slate-400">Belum ada data laporan.</td></tr>`;
             } else {
                 sortedKeys.forEach(k => {
                     const row = groupedData[k];
                     const saldo = row.masuk - row.keluar;
                     html += `
                         <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-4 py-3 font-medium text-slate-700">${row.label}</td>
-                            <td class="px-4 py-3 text-right text-emerald-600">${formatRp(row.masuk).replace('Rp','')}</td>
-                            <td class="px-4 py-3 text-right text-red-500">${formatRp(row.keluar).replace('Rp','')}</td>
-                            <td class="px-4 py-3 text-right font-bold text-slate-800">${formatRp(saldo).replace('Rp','')}</td>
+                            <td class="px-5 py-4 font-semibold text-slate-700">${row.label}</td>
+                            <td class="px-5 py-4 text-right text-emerald-600 font-medium">${formatRp(row.masuk)}</td>
+                            <td class="px-5 py-4 text-right text-red-500 font-medium">${formatRp(row.keluar)}</td>
+                            <td class="px-5 py-4 text-right font-bold text-slate-800 bg-slate-50/50">${formatRp(saldo)}</td>
                         </tr>
                     `;
                 });
@@ -669,7 +753,13 @@
             link.click();
             document.body.removeChild(link);
             
-            Swal.fire('Berhasil', 'File CSV berhasil diunduh. Anda bisa menguploadnya ke Google Drive (Spreadsheet).', 'success');
+            Swal.fire({
+                title: 'Berhasil Download!', 
+                text: 'File CSV berhasil diunduh. Anda bisa menguploadnya ke Google Drive.', 
+                icon: 'success',
+                confirmButtonColor: '#059669',
+                customClass: { popup: 'rounded-3xl' }
+            });
         }
 
     </script>
