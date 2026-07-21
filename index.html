@@ -117,6 +117,81 @@
         font-size: 12px;
     }
 }
+
+/* Responsive Modal SAKTY */
+.swal2-popup {
+    width: min(90vw, 420px) !important;
+    border-radius: 1.5rem !important;
+    padding: 1.25rem !important;
+}
+
+.swal2-title {
+    font-size: 1.1rem !important;
+}
+
+.swal2-html-container {
+    font-size: .9rem !important;
+}
+
+.swal2-input {
+    width: calc(100% - 1rem) !important;
+    margin: .5rem auto !important;
+    font-size: .9rem !important;
+    border-radius: .9rem !important;
+}
+
+@media (max-width: 640px) {
+    .swal2-popup {
+        width: 88vw !important;
+        max-width: 340px !important;
+        padding: 1rem !important;
+    }
+
+    .swal2-title {
+        font-size: 1rem !important;
+    }
+
+    .swal2-actions {
+        gap: .5rem !important;
+        width: 100%;
+    }
+
+    .swal2-confirm,
+    .swal2-cancel {
+        flex: 1;
+        font-size: .85rem !important;
+        padding: .65rem 1rem !important;
+        border-radius: .8rem !important;
+    }
+}
+
+/* PDF Preview Modal lebih proporsional */
+#pdf-preview-modal {
+    padding: 1rem;
+}
+
+#pdf-preview-modal > div {
+    width: min(95vw, 900px);
+    height: min(85vh, 700px);
+}
+
+@media (max-width:640px) {
+    #pdf-preview-modal > div {
+        width: 92vw;
+        height: 78vh;
+        border-radius: 1.5rem;
+    }
+
+    #pdf-preview-modal h3 {
+        font-size: .95rem;
+    }
+
+    #pdf-preview-modal button {
+        padding: .5rem .7rem;
+        font-size: .75rem;
+    }
+}
+
 </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-300">
@@ -409,7 +484,7 @@
                                         <th class="p-3 font-bold">Kategori</th>
                                         <th class="p-3 font-bold">Keterangan</th>
                                         <th class="p-3 text-right font-bold">Nominal</th>
-                                        <th class="p-3 rounded-r-xl text-center font-bold">Tipe</th>
+                                        <th class="p-3 text-center font-bold">Tipe</th><th class="p-3 rounded-r-xl text-center font-bold">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="report-table-body" class="text-sm divide-y divide-slate-100 dark:divide-slate-800/50 text-slate-700 dark:text-slate-300">
@@ -857,11 +932,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td class="p-3 font-medium">${t.description}</td>
                         <td class="p-3 text-right font-bold">${formatRp(t.amount)}</td>
                         <td class="p-3 text-center"><span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${typeClass}">${t.type}</span></td>
+                        <td class="p-3 text-center whitespace-nowrap">
+                            <button onclick="editTransaction('${t.id}')" class="text-blue-600 hover:text-blue-800 mr-2" title="Edit">
+                                <i class="ph-bold ph-pencil-simple text-lg"></i>
+                            </button>
+                            <button onclick="deleteTransaction('${t.id}')" class="text-rose-600 hover:text-rose-800" title="Hapus">
+                                <i class="ph-bold ph-trash text-lg"></i>
+                            </button>
+                        </td>
                     </tr>
                 `;
             });
 
-            if(filtered.length === 0) tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">Tidak ada data untuk filter ini.</td></tr>`;
+            if(filtered.length === 0) tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">Tidak ada data untuk filter ini.</td></tr>`;
             
             document.getElementById('report-income').innerText = formatRp(inc);
             document.getElementById('report-expense').innerText = formatRp(exp);
@@ -940,7 +1023,98 @@ document.addEventListener('DOMContentLoaded', () => {
             Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Password diperbarui!', timer: 1500, showConfirmButton: false, customClass: { popup: 'rounded-3xl dark:bg-slate-900 dark:text-white' } });
         }
 
-        function getReportRows(){
+        
+let editingTransactionId = null;
+
+async function editTransaction(id){
+    const tx = transactions.find(t => String(t.id) === String(id));
+    if(!tx){
+        Swal.fire('Error','Data transaksi tidak ditemukan','error');
+        return;
+    }
+
+    const result = await Swal.fire({
+        title: 'Edit Transaksi',
+        html: `
+            <input id="edit-desc" class="swal2-input" value="${tx.description || ''}" placeholder="Keterangan">
+            <input id="edit-amount" class="swal2-input" value="${Number(tx.amount).toLocaleString('id-ID')}" placeholder="Nominal">
+        `,
+        showCancelButton:true,
+        confirmButtonText:'Simpan',
+        cancelButtonText:'Batal',
+        preConfirm:()=>{
+            return {
+                description: document.getElementById('edit-desc').value,
+                amount: Number(document.getElementById('edit-amount').value.replace(/\./g,''))
+            };
+        }
+    });
+
+    if(result.isConfirmed){
+        const updateData = result.value;
+
+        if(supabaseClient){
+            await supabaseClient
+                .from('transactions')
+                .update(updateData)
+                .eq('id', id);
+        }else{
+            const index = transactions.findIndex(t=>String(t.id)===String(id));
+            if(index !== -1){
+                transactions[index] = {...transactions[index], ...updateData};
+                localStorage.setItem('sakty_tx', JSON.stringify(transactions));
+            }
+        }
+
+        await fetchData();
+        renderReports();
+        renderHome();
+
+        Swal.fire({
+            icon:'success',
+            title:'Data diperbarui',
+            timer:1200,
+            showConfirmButton:false
+        });
+    }
+}
+
+async function deleteTransaction(id){
+    const confirm = await Swal.fire({
+        title:'Hapus transaksi?',
+        text:'Data yang dihapus tidak dapat dikembalikan.',
+        icon:'warning',
+        showCancelButton:true,
+        confirmButtonColor:'#e11d48',
+        confirmButtonText:'Ya, hapus',
+        cancelButtonText:'Batal'
+    });
+
+    if(confirm.isConfirmed){
+        if(supabaseClient){
+            await supabaseClient
+                .from('transactions')
+                .delete()
+                .eq('id', id);
+        }else{
+            transactions = transactions.filter(t=>String(t.id)!==String(id));
+            localStorage.setItem('sakty_tx', JSON.stringify(transactions));
+        }
+
+        await fetchData();
+        renderReports();
+        renderHome();
+
+        Swal.fire({
+            icon:'success',
+            title:'Data dihapus',
+            timer:1200,
+            showConfirmButton:false
+        });
+    }
+}
+
+function getReportRows(){
             const year=document.getElementById('report-year').value;
             const month=document.getElementById('report-month').value;
             const cat=document.getElementById('report-category-filter').value;
