@@ -12,6 +12,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -595,7 +597,10 @@
                         <button onclick="closePDFPreview()" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl font-bold text-sm">Tutup</button>
                     </div>
                 </div>
-                <iframe id="pdf-preview-frame" class="flex-1 w-full"></iframe>
+                <iframe id="pdf-preview-frame" class="flex-1 w-full hidden md:block"></iframe>
+                <div id="pdf-mobile-preview" class="flex-1 overflow-auto bg-slate-100 dark:bg-slate-800 p-2 hidden md:hidden">
+                    <canvas id="pdf-preview-canvas" class="w-full bg-white shadow"></canvas>
+                </div>
             </div>
         </div>
 
@@ -1312,15 +1317,57 @@ let pdfPreviewUrl=null;
             return doc;
         }
 
-        function previewPDFReport(){
+        async function previewPDFReport(){
             const doc=createPDFReport();
+
             if(pdfPreviewUrl) URL.revokeObjectURL(pdfPreviewUrl);
+
             const blob=doc.output('blob');
             pdfPreviewUrl=URL.createObjectURL(blob);
-            document.getElementById('pdf-preview-frame').src=pdfPreviewUrl;
+
             const modal=document.getElementById('pdf-preview-modal');
+            const frame=document.getElementById('pdf-preview-frame');
+            const mobilePreview=document.getElementById('pdf-mobile-preview');
+
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+
+            if(window.innerWidth <= 640){
+                frame.classList.add('hidden');
+                mobilePreview.classList.remove('hidden');
+
+                try{
+                    const buffer = await blob.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({data:buffer}).promise;
+                    const page = await pdf.getPage(1);
+
+                    const canvas=document.getElementById('pdf-preview-canvas');
+                    const context=canvas.getContext('2d');
+
+                    const viewport=page.getViewport({scale:1.4});
+                    canvas.width=viewport.width;
+                    canvas.height=viewport.height;
+
+                    await page.render({
+                        canvasContext:context,
+                        viewport:viewport
+                    }).promise;
+
+                }catch(error){
+                    mobilePreview.innerHTML=`
+                    <div class="p-6 text-center text-slate-500">
+                        <p class="mb-3">Preview PDF tidak tersedia.</p>
+                        <button onclick="downloadPDFReport()" class="bg-rose-600 text-white px-4 py-2 rounded-xl font-bold">
+                        Download PDF
+                        </button>
+                    </div>`;
+                }
+
+            }else{
+                mobilePreview.classList.add('hidden');
+                frame.classList.remove('hidden');
+                frame.src=pdfPreviewUrl;
+            }
         }
 
         function closePDFPreview(){
