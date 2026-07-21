@@ -82,16 +82,19 @@
             
             <form id="login-form" class="space-y-5">
                 <div class="relative">
-                    <input type="password" id="password-input" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700/50 rounded-2xl px-12 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center text-lg tracking-widest transition-all dark:text-white dark:placeholder-slate-500 shadow-inner font-semibold" placeholder="Masukkan Password" required>
+                    <input type="password" id="password-input" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700/50 rounded-2xl px-10 sm:px-12 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center text-sm sm:text-base tracking-widest transition-all dark:text-white dark:placeholder-slate-500 shadow-inner font-semibold" placeholder="Masukkan Password" required>
                     <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800" title="Tampilkan/Sembunyikan Password">
                         <i id="eye-icon" class="ph-bold ph-eye-slash text-xl"></i>
                     </button>
                 </div>
-                <button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-teal-700/30 dark:shadow-none flex items-center justify-center gap-2 text-lg">
+                <button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-teal-700/30 dark:shadow-none flex items-center justify-center gap-2 text-base md:text-lg">
                     Masuk Sistem <i class="ph-bold ph-arrow-right"></i>
                 </button>
             </form>
-            <p id="login-status-text" class="text-xs text-teal-600 dark:text-teal-400 mt-6 font-semibold animate-pulse">Menghubungkan ke server...</p>
+
+            <div class="mt-8 text-[10px] text-slate-400 dark:text-slate-500 font-medium tracking-wide flex items-center justify-center gap-1.5">
+                Made with <i class="ph-fill ph-heart text-rose-500 animate-pulse text-xs"></i> Biro IT P2S Abu Zairi &copy; 2026
+            </div>
         </div>
     </div>
 
