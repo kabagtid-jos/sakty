@@ -52,8 +52,11 @@
             <p class="text-sm text-slate-500 mb-8">Sistem Akuntansi Kas Terpadu Yayasan<br>Ponpes Islam Salafiyah Abu-Zairi</p>
             
             <form id="login-form" class="space-y-4">
-                <div>
-                    <input type="password" id="password-input" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-center text-lg tracking-widest transition-all" placeholder="Masukkan Kode Akses" required>
+                <div class="relative">
+                    <input type="password" id="password-input" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-12 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-center text-lg tracking-widest transition-all" placeholder="Masukkan Password" required>
+                    <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors p-1" title="Tampilkan/Sembunyikan Password">
+                        <i id="eye-icon" class="ph-bold ph-eye-slash text-2xl"></i>
+                    </button>
                 </div>
                 <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-200/50 flex items-center justify-center gap-2">
                     Masuk Sistem <i class="ph-bold ph-arrow-right"></i>
@@ -332,6 +335,19 @@
     </div>
 
     <script>
+        // Fungsi untuk Tampilkan/Sembunyikan Password di Menu Login
+        function togglePassword() {
+            const input = document.getElementById('password-input');
+            const icon = document.getElementById('eye-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('ph-eye-slash', 'ph-eye');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('ph-eye', 'ph-eye-slash');
+            }
+        }
+
         // --- KONFIGURASI SUPABASE ---
         const SUPABASE_URL = 'https://dkcmthggilaplyxvhnpp.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrY210aGdnaWxhcGx5eHZobnBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MTc5MTgsImV4cCI6MjEwMDE5MzkxOH0.TpSIk3T4I6r-SBC7Uqlwq8-VOf3IslSjWxx681r-tpI';
