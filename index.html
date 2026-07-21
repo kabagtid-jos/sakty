@@ -423,7 +423,7 @@
                                 <input type="file" id="tx-photo" accept="image/*"
                                     class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 dark:text-white transition-colors">
                                 <p class="text-[11px] text-slate-400 mt-1">
-                                    Foto bukti transaksi akan disimpan aman melalui IMGBB.
+                                    Upload gambar bukti transaksi seperti kwitansi, nota, atau bukti TF.
                                 </p>
                             </div>
                             
@@ -495,7 +495,7 @@
                                         <th class="p-3 font-bold">Kategori</th>
                                         <th class="p-3 font-bold">Keterangan</th>
                                         <th class="p-3 text-right font-bold">Nominal</th>
-                                        <th class="p-3 text-center font-bold">Tipe</th><th class="p-3 rounded-r-xl text-center font-bold">Aksi</th>
+                                        <th class="p-3 text-center font-bold">Tipe</th><th class="p-3 rounded-r-xl text-center font-bold">Aksi</th><th class="p-3 text-center font-bold">Bukti</th>
                                     </tr>
                                 </thead>
                                 <tbody id="report-table-body" class="text-sm divide-y divide-slate-100 dark:divide-slate-800/50 text-slate-700 dark:text-slate-300">
@@ -568,7 +568,23 @@
             </div>
         </main>
         
-        <!-- MODAL PREVIEW PDF -->
+        
+<!-- MODAL PREVIEW FOTO BUKTI -->
+<div id="photo-preview-modal" class="hidden fixed inset-0 z-[110] bg-slate-950/70 backdrop-blur-sm p-4 items-center justify-center">
+    <div class="bg-white dark:bg-slate-900 w-[90vw] max-w-md rounded-3xl overflow-hidden shadow-2xl">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+            <h3 class="font-extrabold text-lg text-slate-800 dark:text-white">Bukti Foto Transaksi</h3>
+            <button onclick="closePhotoPreview()" class="text-slate-500 hover:text-rose-500">
+                <i class="ph-bold ph-x text-xl"></i>
+            </button>
+        </div>
+        <div class="p-4">
+            <img id="photo-preview-image" class="w-full rounded-2xl object-contain max-h-[60vh]" src="">
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PREVIEW PDF -->
         <div id="pdf-preview-modal" class="hidden fixed inset-0 z-[100] bg-slate-950/70 backdrop-blur-sm p-4 items-center justify-center">
             <div class="bg-white dark:bg-slate-900 w-full max-w-4xl h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col">
                 <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
@@ -951,11 +967,19 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <i class="ph-bold ph-trash text-lg"></i>
                             </button>
                         </td>
+                        <td class="p-3 text-center">
+                            ${t.photo_url ? `
+                            <button onclick="viewTransactionPhoto('${t.photo_url}')" 
+                                class="text-teal-600 hover:text-teal-800" title="Lihat Bukti Foto">
+                                <i class="ph-bold ph-image text-xl"></i>
+                            </button>` : `
+                            <span class="text-slate-300 text-xs">-</span>`}
+                        </td>
                     </tr>
                 `;
             });
 
-            if(filtered.length === 0) tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">Tidak ada data untuk filter ini.</td></tr>`;
+            if(filtered.length === 0) tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">Tidak ada data untuk filter ini.</td></tr>`;
             
             document.getElementById('report-income').innerText = formatRp(inc);
             document.getElementById('report-expense').innerText = formatRp(exp);
@@ -1171,7 +1195,21 @@ function getReportRows(){
             });
         }
 
-        let pdfPreviewUrl=null;
+        
+function viewTransactionPhoto(url){
+    document.getElementById('photo-preview-image').src = url;
+    const modal = document.getElementById('photo-preview-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closePhotoPreview(){
+    const modal = document.getElementById('photo-preview-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+let pdfPreviewUrl=null;
 
         function createPDFReport(){
             const { jsPDF } = window.jspdf;
