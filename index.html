@@ -1385,16 +1385,39 @@ let pdfPreviewUrl=null;
                 ['No','Tanggal','Kategori','Keterangan','Jenis','Nominal']
             ];
 
-            getReportRows().forEach((t,i)=>{
+            const reportData = getReportRows();
+
+            let totalMasuk = 0;
+            let totalKeluar = 0;
+
+            reportData.forEach((t,i)=>{
+                const nominal = Number(t.amount);
+
+                if(t.type === 'masuk'){
+                    totalMasuk += nominal;
+                }else{
+                    totalKeluar += nominal;
+                }
+
                 rows.push([
-                    i+1,
+                    i + 1,
                     t.date,
                     t.category || 'Kas Umum',
                     t.description,
                     t.type === 'masuk' ? 'Pemasukan' : 'Pengeluaran',
-                    Number(t.amount)
+                    nominal
                 ]);
             });
+
+            const sisaKas = totalMasuk - totalKeluar;
+
+            // Jarak sebelum ringkasan
+            rows.push([]);
+            rows.push(['Ringkasan Keuangan','']);
+            rows.push(['Keterangan','Nominal']);
+            rows.push(['Total Pemasukan', totalMasuk]);
+            rows.push(['Total Pengeluaran', totalKeluar]);
+            rows.push(['Sisa Kas', sisaKas]);
 
             const ws = XLSX.utils.aoa_to_sheet(rows);
 
