@@ -10,6 +10,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <script>
@@ -349,11 +351,23 @@
                 <!-- VIEW: LAPORAN -->
                 <div id="view-reports" class="view-section hidden space-y-6">
                     <div class="bg-white dark:bg-slate-900 p-5 md:p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                            <div>
-                                <h3 class="font-extrabold text-slate-800 dark:text-white text-lg">Rekap & Laporan</h3>
-                                <p class="text-xs text-slate-500 font-medium">Berdasarkan filter terpilih</p>
+                        <div class="flex flex-col gap-4 mb-6">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                                <div>
+                                    <h3 class="font-extrabold text-slate-800 dark:text-white text-lg">Rekap & Laporan</h3>
+                                    <p class="text-xs text-slate-500 font-medium">Berdasarkan filter terpilih</p>
+                                </div>
+
+                                <div class="flex flex-row gap-2 w-full md:w-auto">
+                                    <button onclick="previewPDFReport()" class="flex-1 md:flex-none bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2">
+                                        <i class="ph-bold ph-file-pdf"></i> Export PDF
+                                    </button>
+                                    <button onclick="exportExcelReport()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2">
+                                        <i class="ph-bold ph-file-xls"></i> Export Excel
+                                    </button>
+                                </div>
                             </div>
+
                             <div class="grid grid-cols-3 gap-2 w-full relative z-30 overflow-visible">
 
                                 <select id="report-category-filter" class="sakty-select flex-1 min-w-0 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 md:px-3 py-2 text-sm font-semibold outline-none dark:text-white focus:ring-2 focus:ring-teal-500"></select>
@@ -404,11 +418,7 @@
                             </table>
                         </div>
                         
-                        <div class="mt-4 flex justify-end">
-                            <button onclick="downloadCSV()" class="bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-bold py-2.5 px-5 rounded-xl text-sm transition-all flex items-center gap-2">
-                                <i class="ph-bold ph-download-simple"></i> Download CSV
-                            </button>
-                        </div>
+                        
                     </div>
                 </div>
 
@@ -472,6 +482,20 @@
             </div>
         </main>
         
+        <!-- MODAL PREVIEW PDF -->
+        <div id="pdf-preview-modal" class="hidden fixed inset-0 z-[100] bg-slate-950/70 backdrop-blur-sm p-4 items-center justify-center">
+            <div class="bg-white dark:bg-slate-900 w-full max-w-4xl h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+                    <h3 class="font-extrabold text-lg text-slate-800 dark:text-white">Preview Laporan PDF</h3>
+                    <div class="flex gap-2">
+                        <button onclick="downloadPDFReport()" class="bg-rose-600 text-white px-4 py-2 rounded-xl font-bold text-sm">Download</button>
+                        <button onclick="closePDFPreview()" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl font-bold text-sm">Tutup</button>
+                    </div>
+                </div>
+                <iframe id="pdf-preview-frame" class="flex-1 w-full"></iframe>
+            </div>
+        </div>
+
         <!-- BOTTOM NAVIGATION (Mobile) -->
         <nav class="md:hidden glass-panel fixed bottom-0 w-full border-t border-slate-200 dark:border-slate-800 flex justify-around items-center px-2 py-3 pb-safe z-50 transition-colors">
             <button onclick="switchView('home')" id="nav-home-mobile" class="nav-btn w-16 flex flex-col items-center gap-1 text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
@@ -896,15 +920,65 @@
             Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Password diperbarui!', timer: 1500, showConfirmButton: false, customClass: { popup: 'rounded-3xl dark:bg-slate-900 dark:text-white' } });
         }
 
-        function downloadCSV() {
-            if(transactions.length === 0) return;
-            let csv = 'Tanggal,Kategori,Keterangan,Tipe,Nominal\n';
-            transactions.forEach(t => { csv += `${t.date},"${t.category || 'Kas Umum'}","${t.description}",${t.type},${t.amount}\n`; });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('hidden', ''); a.setAttribute('href', url); a.setAttribute('download', `Laporan_SAKTY_${Date.now()}.csv`);
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        function getReportRows(){
+            const year=document.getElementById('report-year').value;
+            const month=document.getElementById('report-month').value;
+            const cat=document.getElementById('report-category-filter').value;
+            return transactions.filter(t=>{
+                return t.date.startsWith(year) &&
+                (month==='all' || t.date.split('-')[1]===month) &&
+                (cat==='Semua Kategori' || t.category===cat || (!t.category && cat==='Kas Umum'));
+            });
+        }
+
+        let pdfPreviewUrl=null;
+
+        function createPDFReport(){
+            const { jsPDF } = window.jspdf;
+            const doc=new jsPDF();
+            doc.setFontSize(16);
+            doc.text('SAKTY - Laporan Keuangan Yayasan',14,20);
+            doc.setFontSize(10);
+            doc.text('PONPES ISLAM SALAFIYAH ABU ZAIRI',14,28);
+            let y=40;
+            doc.text('Tanggal | Kategori | Keterangan | Tipe | Nominal',14,y);
+            y+=8;
+            getReportRows().forEach(t=>{
+                let line=`${t.date} | ${t.category||'Kas Umum'} | ${t.description} | ${t.type} | Rp ${Number(t.amount).toLocaleString('id-ID')}`;
+                doc.text(line.substring(0,110),14,y); y+=7;
+                if(y>280){doc.addPage(); y=20;}
+            });
+            return doc;
+        }
+
+        function previewPDFReport(){
+            const doc=createPDFReport();
+            if(pdfPreviewUrl) URL.revokeObjectURL(pdfPreviewUrl);
+            const blob=doc.output('blob');
+            pdfPreviewUrl=URL.createObjectURL(blob);
+            document.getElementById('pdf-preview-frame').src=pdfPreviewUrl;
+            const modal=document.getElementById('pdf-preview-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closePDFPreview(){
+            const modal=document.getElementById('pdf-preview-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function downloadPDFReport(){
+            createPDFReport().save(`Laporan_SAKTY_${Date.now()}.pdf`);
+        }
+
+        function exportExcelReport(){
+            const rows=[['Tanggal','Kategori','Keterangan','Tipe','Nominal']];
+            getReportRows().forEach(t=>rows.push([t.date,t.category||'Kas Umum',t.description,t.type,Number(t.amount)]));
+            const ws=XLSX.utils.aoa_to_sheet(rows);
+            const wb=XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb,ws,'Laporan');
+            XLSX.writeFile(wb,`Laporan_SAKTY_${Date.now()}.xlsx`);
         }
     </script>
 <script>
