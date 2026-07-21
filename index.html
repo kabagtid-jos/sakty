@@ -428,9 +428,7 @@
                 }
             }
             isSettingsLoaded = true;
-            document.getElementById('login-status-text').innerText = 'Terhubung dengan server. Siap digunakan.';
-            document.getElementById('login-status-text').classList.remove('animate-pulse');
-            document.getElementById('login-status-text').classList.replace('text-slate-400', 'text-emerald-500');
+            document.getElementById('login-status-text').classList.add('hidden');
         }
 
         // --- FUNGSI AUTH & NAVIGASI ---
